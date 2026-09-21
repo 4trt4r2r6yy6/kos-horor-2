@@ -1,42 +1,44 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>KOS HOROR 2 - MALAM KEDUA</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>KOS HOROR 2</title>
 <style>
-body{margin:0;background:#050505;color:#fff;font-family:monospace;overflow:hidden}
-#hud{position:fixed;top:0;left:0;right:0;background:#1a0000;border-bottom:2px solid #ff0000;padding:8px;display:flex;justify-content:space-between;z-index:100}
-#game{width:100vw;height:100vh;position:relative;background:radial-gradient(circle at center,#1a1a1a 0%,#000 100%);overflow:hidden}
-#player{width:20px;height:20px;background:yellow;position:absolute;border-radius:50%;box-shadow:0 0 15px yellow;z-index:10;border:2px solid white}
-.key{width:14px;height:14px;background:lime;position:absolute;box-shadow:0 0 10px lime;animation:blink 1s infinite}
-.hantu{width:30px;height:30px;background:radial-gradient(red, darkred);position:absolute;border-radius:50% 50% 0 0;box-shadow:0 0 15px red;z-index:5}
-.hantu::after{content:'👻';position:absolute;top:-5px;left:5px;font-size:20px}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
-.wall{position:absolute;background:#222;border:1px solid #333}
-#flashlight{position:absolute;width:200px;height:200px;background:radial-gradient(circle, rgba(255,255,200,0.15) 0%, transparent 70%);pointer-events:none;z-index:2;mix-blend-mode:screen}
-#msg{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(255,0,0,0.8);padding:10px 20px;display:none;z-index:200}
-#joystick{position:fixed;bottom:30px;left:30px;width:100px;height:100px;background:rgba(255,255,255,0.1);border-radius:50%;z-index:50}
+*{margin:0;padding:0;box-sizing:border-box}body{background:#000;color:#fff;font-family:Arial;overflow:hidden}
+#hud{height:40px;background:#300;display:flex;justify-content:space-around;align-items:center;border-bottom:2px solid red}
+canvas{display:block;width:100%;height:calc(100vh - 40px - 100px);background:#111}
+#ctrl{height:100px;background:#000;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:10px}
+#ctrl button{background:#333;color:#fff;border:1px solid red;font-size:20px;border-radius:10px}
+#ctrl button:active{background:red}
+#win{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);display:none;justify-content:center;align-items:center;flex-direction:column;z-index:99}
 </style>
 </head>
 <body>
-<div id="hud">
-<div>KUNCI: <span id="kc">0</span>/5</div>
-<div>NYAWA: <span id="hp">❤️❤️❤️</span></div>
-<div id="time">02:00</div>
+<div id="hud"><b id="k">KUNCI:0/3</b><b>❤️❤️❤️</b><b id="t">02:00</b></div>
+<canvas id="c"></canvas>
+<div id="ctrl">
+<button id="l">◀️</button><button id="u">🔼 MAJU</button><button id="r">▶️</button>
+<button id="dl">↩️</button><button id="d">🔽 MUNDUR</button><button id="dr">↪️</button>
 </div>
-<div id="game">
-<div id="flashlight"></div>
-<div id="player"></div>
-<div id="msg"></div>
-<div id="joystick"></div>
-</div>
+<div id="win"><h1 id="wt"></h1><p id="wp"></p><button onclick="location.reload()" style="padding:15px 30px;background:red;color:#fff;border:none;margin-top:20px;font-size:18px">MAIN LAGI</button></div>
 <script>
-let kunci=0,nyawa=3,px=50,py=50;
-let keys=[],hantus=[];
-let game=document.getElementById('game');
-let player=document.getElementById('player');
-let light=document.getElementById('flashlight');
-
-// BIKIN TEMBOK KOS
-let walls=[{x:0,y:0,w:100,h:2},{x:0,y:98,w:100,h:2},{x
+c=document.getElementById('c');x=c.getContext('2d');function rs(){c.width=innerWidth;c.height=innerHeight-140;}rs();
+let px=1.5,py=1.5,ang=0,keys=0,tl=120;
+let map=[[1,1,1,1,1,1,1,1,1,1],[1,0,0,0,1,0,0,2,0,1],[1,0,1,0,1,0,1,1,0,1],[1,0,1,0,0,0,0,0,0,1],[1,0,1,1,1,1,1,1,0,1],[1,0,0,0,0,0,0,1,0,1],[1,1,1,1,0,1,0,1,0,1],[1,0,2,0,0,1,0,0,0,1],[1,0,0,0,1,1,0,1,2,1],[1,1,1,1,1,1,1,1,1,1]];
+let kp=[];for(let r=0;r<10;r++)for(let cc=0;cc<10;cc++)if(map[r][cc]==2){kp.push({x:cc+0.5,y:r+0.5,f:false});map[r][cc]=0;}
+setInterval(()=>{if(tl>0){tl--;document.getElementById('t').innerText=Math.floor(tl/60)+':'+('0'+tl%60).slice(-2);}},1000);
+let mv={f:0,b:0,l:0,r:0};
+function bind(id,k,v){let e=document.getElementById(id);e.addEventListener('touchstart',()=>mv[k]=v);e.addEventListener('touchend',()=>mv[k]=0);e.addEventListener('mousedown',()=>mv[k]=v);e.addEventListener('mouseup',()=>mv[k]=0);}
+bind('u','f',1);bind('d','b',1);bind('l','l',1);bind('r','r',1);bind('dl','l',1);bind('dr','r',1);
+let lastX=0;c.addEventListener('touchstart',e=>lastX=e.touches[0].clientX);
+c.addEventListener('touchmove',e=>{let cur=e.touches[0].clientX;ang+=(cur-lastX)*0.01;lastX=cur;});
+function draw(){
+let w=c.width,h=c.height;x.fillStyle='#222';x.fillRect(0,0,w,h/2);x.fillStyle='#111';x.fillRect(0,h/2,w,h);
+let rays=100;for(let i=0;i<rays;i++){let ra=ang-0.5+i/rays,dist=0,hit=false;while(!hit&&dist<15){dist+=0.05;let rx=px+Math.cos(ra)*dist,ry=py+Math.sin(ra)*dist;if(map[Math.floor(ry)][Math.floor(rx)]==1)hit=true;}let cd=dist*Math.cos(ra-ang);let lh=h/cd;let shade=255-cd*20;if(shade<0)shade=0;x.fillStyle='rgb('+shade*0.2+','+shade*0.1+','+shade*0.1+')';x.fillRect(i*w/rays,h/2-lh/2,w/rays+1,lh);}
+for(let k of kp){if(k.f)continue;let dx=k.x-px,dy=k.y-py,d=Math.hypot(dx,dy),a=Math.atan2(dy,dx)-ang;while(a<-3.14)a+=6.28;while(a>3.14)a-=6.28;if(Math.abs(a)<0.6&&d<5){let sx=(a+0.5)*w;let size=200/d;x.fillStyle='yellow';x.fillRect(sx-size/2,h/2-size/2,size,size);x.fillStyle='#000';x.font='bold '+(size/2)+'px Arial';x.fillText('🔑',sx-size/4,h/2+size/4);if(d<0.8){k.f=true;keys++;document.getElementById('k').innerText='KUNCI:'+keys+'/3';if(keys>=3){document.getElementById('wt').innerText='KAMU MENANG!';document.getElementById('wp').innerText='Berhasil kabur!';document.getElementById('win').style.display='flex';}}}}
+}
+function upd(){let s=0.07;if(mv.f){let nx=px+Math.cos(ang)*s,ny=py+Math.sin(ang)*s;if(map[Math.floor(py)][Math.floor(nx)]==0)px=nx;if(map[Math.floor(ny)][Math.floor(px)]==0)py=ny;}if(mv.b){let nx=px-Math.cos(ang)*s,ny=py-Math.sin(ang)*s;if(map[Math.floor(py)][Math.floor(nx)]==0)px=nx;if(map[Math.floor(ny)][Math.floor(px)]==0)py=ny;}if(mv.l)ang-=0.07;if(mv.r)ang+=0.07;}
+(function lp(){upd();draw();requestAnimationFrame(lp);})();
+</script>
+</body>
+  </html>
