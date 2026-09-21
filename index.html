@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>KOS HOROR 2 - MALAM KEDUA</title>
+<style>
+body{margin:0;background:#050505;color:#fff;font-family:monospace;overflow:hidden}
+#hud{position:fixed;top:0;left:0;right:0;background:#1a0000;border-bottom:2px solid #ff0000;padding:8px;display:flex;justify-content:space-between;z-index:100}
+#game{width:100vw;height:100vh;position:relative;background:radial-gradient(circle at center,#1a1a1a 0%,#000 100%);overflow:hidden}
+#player{width:20px;height:20px;background:yellow;position:absolute;border-radius:50%;box-shadow:0 0 15px yellow;z-index:10;border:2px solid white}
+.key{width:14px;height:14px;background:lime;position:absolute;box-shadow:0 0 10px lime;animation:blink 1s infinite}
+.hantu{width:30px;height:30px;background:radial-gradient(red, darkred);position:absolute;border-radius:50% 50% 0 0;box-shadow:0 0 15px red;z-index:5}
+.hantu::after{content:'👻';position:absolute;top:-5px;left:5px;font-size:20px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.wall{position:absolute;background:#222;border:1px solid #333}
+#flashlight{position:absolute;width:200px;height:200px;background:radial-gradient(circle, rgba(255,255,200,0.15) 0%, transparent 70%);pointer-events:none;z-index:2;mix-blend-mode:screen}
+#msg{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(255,0,0,0.8);padding:10px 20px;display:none;z-index:200}
+#joystick{position:fixed;bottom:30px;left:30px;width:100px;height:100px;background:rgba(255,255,255,0.1);border-radius:50%;z-index:50}
+</style>
+</head>
+<body>
+<div id="hud">
+<div>KUNCI: <span id="kc">0</span>/5</div>
+<div>NYAWA: <span id="hp">❤️❤️❤️</span></div>
+<div id="time">02:00</div>
+</div>
+<div id="game">
+<div id="flashlight"></div>
+<div id="player"></div>
+<div id="msg"></div>
+<div id="joystick"></div>
+</div>
+<script>
+let kunci=0,nyawa=3,px=50,py=50;
+let keys=[],hantus=[];
+let game=document.getElementById('game');
+let player=document.getElementById('player');
+let light=document.getElementById('flashlight');
+
+// BIKIN TEMBOK KOS
+let walls=[{x:0,y:0,w:100,h:2},{x:0,y:98,w:100,h:2},{x
